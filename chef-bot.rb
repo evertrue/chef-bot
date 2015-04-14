@@ -83,10 +83,11 @@ if stale.rows.length
       text: (new_known - known).map { |fqdn| " - #{fqdn}" }.join("\n"),
       color: 'warning'
     }
+    hours = (timeout / 3600).floor
     if (known - new_known).length == 1
-      message += "1 node in your network has gone stale.\n"
+      message += "1 node in your network hasn't checked in in the last #{hours} hours\n"
     else
-      message += "#{new_known.length} nodes in you network have gone stale\n"
+      message += "#{new_known.length} nodes in you network haven't checked in in the last #{hours} hours\n"
     end
   end
   if (known - new_known).any?
