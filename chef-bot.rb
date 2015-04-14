@@ -51,7 +51,7 @@ end
 notifier = Slack::Notifier.new ENV['CHEF_BOT_SLACK_HOOK']
 
 notifier.channel = ENV['CHEF_BOT_CHANNEL']
-notifier.username = ENV['CHEF_BOT_CHANNEL'] ||= 'Chef Bot'
+notifier.username = ENV['CHEF_BOT_NAME'] ||= 'Chef Bot'
 
 if ENV['CHEF_BOT_STALE_TIME']
   timeout = ENV['CHEF_BOT_STALE_TIME'].to_i
