@@ -108,3 +108,5 @@ end
 file = File.open(filename, 'w')
 JSON.dump(new_known, file)
 file.close
+
+puts "[#{DateTime.now}] Stale Nodes: #{new_known}"
