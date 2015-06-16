@@ -7,6 +7,14 @@ require 'json'
 
 include ChefAPI::Resource
 
+def pluralize(n, singular, plural)
+  if n == 1
+    singular
+  else
+    plural
+  end
+end
+
 filename = 'stale.json'
 icon_url = 'http://ops.evertrue.com.s3.amazonaws.com/public/chef_logo.png'
 ChefAPI.configure do |config|
@@ -63,50 +71,50 @@ stale = Search.query(:node, "ohai_time:[* TO #{Time.now.to_i - timeout}]", start
 
 if File.exist?(filename)
   file = File.open(filename, 'r')
-  known = JSON.parse(file.read)
+  known_stale = JSON.parse(file.read)
   file.close
 else
-  known = []
+  known_stale = []
 end
 
 attachments = []
-new_known = []
+current_stale = []
 message = ''
+
 if stale.rows.length
   stale.rows.each do |result|
-    new_known << result['name']
+    current_stale << result['name']
   end
 
-  if (new_known - known).any?
+  new_stale = (current_stale - known_stale)
+  old_stale = (known_stale - current_stale)
+
+  if new_stale.any?
     attachments << {
-      fallback: (new_known - known).map { |fqdn| " - #{fqdn}" }.join("\n"),
-      text: (new_known - known).map { |fqdn| " - #{fqdn}" }.join("\n"),
+      fallback: new_stale.map { |fqdn| " - #{fqdn}" }.join("\n"),
+      text: new_stale.map { |fqdn| " - #{fqdn}" }.join("\n"),
       color: 'warning'
     }
-    hours = (timeout / 3600).floor
-    if (known - new_known).length == 1
-      message += "1 node in your network hasn't checked in in the last #{hours} hours\n"
-    else
-      message += "#{new_known.length} nodes in you network haven't checked in in the last #{hours} hours\n"
-    end
+
+    message += "#{new_stale.length} #{pluralize(new_stale.length, 'node', 'nodes')} in your network just went stale\n"
   end
-  if (known - new_known).any?
+
+  if old_stale.any?
     attachments << {
-      fallback: (known - new_known).map { |fqdn| " - #{fqdn}" }.join("\n"),
-      text: (known - new_known).map { |fqdn| " - #{fqdn}" }.join("\n"),
+      fallback: old_stale.map { |fqdn| " - #{fqdn}" }.join("\n"),
+      text: old_stale.map { |fqdn| " - #{fqdn}" }.join("\n"),
       color: 'good'
     }
-    if (known - new_known).length == 1
-      message += "1 node in your network has freshened.\n"
-    else
-      message += "#{new_known.length} nodes in you network have freshened\n"
-    end
+    message += "#{old_stale.length} #{pluralize(old_stale.length, 'node', 'nodes')} in your network have freshened\n"
   end
+
+  message += "There #{pluralize(current_stale.length, 'is', 'are')} currently #{current_stale.length} stale #{pluralize(current_stale.length, 'node', 'nodes')}"
+
   notifier.ping message, attachments: attachments, icon_url: icon_url if attachments.any?
 end
 
 file = File.open(filename, 'w')
-JSON.dump(new_known, file)
+JSON.dump(current_stale, file)
 file.close
 
-puts "[#{DateTime.now}] Stale Nodes: #{new_known}"
+puts "[#{DateTime.now}] Stale Nodes: #{current_stale}"
