@@ -111,11 +111,11 @@ class Chef_Bot
     @message += "There #{pluralize(current_stale.length, 'is', 'are')} currently #{current_stale.length} stale #{pluralize(current_stale.length, 'node', 'nodes')}"
 
     # Send message to slack if there are any attachments (anything went stale or freshened)
-    notifier.ping message, attachments: attachments, icon_url: icon_url if attachments.any?
+    @notifier.ping @message, attachments: @attachments, icon_url: @icon_url if @attachments.any?
 
     # Save the current list of stale nodes for next time
 
-    puts "[#{DateTime.now}] Stale Nodes: #{current_stale}"
+    puts "[#{DateTime.now}] Stale Nodes: #{@current_stale}"
 
     save(filename)
   end
