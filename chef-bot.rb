@@ -82,9 +82,7 @@ current_stale = []
 message = ''
 
 if stale.rows.length
-  stale.rows.each do |result|
-    current_stale << result['name']
-  end
+  current_stale = stale.rows.map { |result| return result['name'] }
 
   new_stale = (current_stale - known_stale)
   old_stale = (known_stale - current_stale)
