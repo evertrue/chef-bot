@@ -68,7 +68,9 @@ else
 end
 
 stale = Search.query(:node, "ohai_time:[* TO #{Time.now.to_i - timeout}]", start: 1)
+current_stale = stale.rows.map { |result| return result['name'] }
 
+# Load up the previously known stale nodes
 if File.exist?(filename)
   file = File.open(filename, 'r')
   known_stale = JSON.parse(file.read)
@@ -78,39 +80,40 @@ else
 end
 
 attachments = []
-current_stale = []
 message = ''
 
-if stale.rows.length
-  current_stale = stale.rows.map { |result| return result['name'] }
+# Compute Nodes that just went stale and ones that freshened
+new_stale = (current_stale - known_stale)
+old_stale = (known_stale - current_stale)
 
-  new_stale = (current_stale - known_stale)
-  old_stale = (known_stale - current_stale)
+# if any went stale
+if new_stale.any?
+  attachments << {
+    fallback: new_stale.map { |fqdn| " - #{fqdn}" }.join("\n"),
+    text: new_stale.map { |fqdn| " - #{fqdn}" }.join("\n"),
+    color: 'warning'
+  }
 
-  if new_stale.any?
-    attachments << {
-      fallback: new_stale.map { |fqdn| " - #{fqdn}" }.join("\n"),
-      text: new_stale.map { |fqdn| " - #{fqdn}" }.join("\n"),
-      color: 'warning'
-    }
-
-    message += "#{new_stale.length} #{pluralize(new_stale.length, 'node', 'nodes')} in your network just went stale\n"
-  end
-
-  if old_stale.any?
-    attachments << {
-      fallback: old_stale.map { |fqdn| " - #{fqdn}" }.join("\n"),
-      text: old_stale.map { |fqdn| " - #{fqdn}" }.join("\n"),
-      color: 'good'
-    }
-    message += "#{old_stale.length} #{pluralize(old_stale.length, 'node', 'nodes')} in your network have freshened\n"
-  end
-
-  message += "There #{pluralize(current_stale.length, 'is', 'are')} currently #{current_stale.length} stale #{pluralize(current_stale.length, 'node', 'nodes')}"
-
-  notifier.ping message, attachments: attachments, icon_url: icon_url if attachments.any?
+  message += "#{new_stale.length} #{pluralize(new_stale.length, 'node', 'nodes')} in your network just went stale\n"
 end
 
+# If any freshened
+if old_stale.any?
+  attachments << {
+    fallback: old_stale.map { |fqdn| " - #{fqdn}" }.join("\n"),
+    text: old_stale.map { |fqdn| " - #{fqdn}" }.join("\n"),
+    color: 'good'
+  }
+  message += "#{old_stale.length} #{pluralize(old_stale.length, 'node', 'nodes')} in your network have freshened\n"
+end
+
+# Tag on a totals message to display the complete state of the nodes
+message += "There #{pluralize(current_stale.length, 'is', 'are')} currently #{current_stale.length} stale #{pluralize(current_stale.length, 'node', 'nodes')}"
+
+# Send message to slack if there are any attachments (anything went stale or freshened)
+notifier.ping message, attachments: attachments, icon_url: icon_url if attachments.any?
+
+# Save the current list of stale nodes for next time
 file = File.open(filename, 'w')
 JSON.dump(current_stale, file)
 file.close
