@@ -83,11 +83,7 @@ class Chef_Bot
   end
 
   def query
-    if ENV['CHEF_BOT_STALE_TIME']
-      timeout = ENV['CHEF_BOT_STALE_TIME'].to_i
-    else
-      timeout = 4800 # 90 minutes
-    end
+    timeout = (ENV['CHEF_BOT_STALE_TIME'] || 4800).to_i
 
     stale = Search.query(:node, "ohai_time:[* TO #{Time.now.to_i - timeout}]", start: 1)
     @current_stale = stale.rows.map { |result| return result['name'] }
