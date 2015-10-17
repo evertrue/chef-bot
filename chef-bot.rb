@@ -12,7 +12,7 @@ class Chef_Bot
   def initialize
     @attachments = []
     @message = ''
-    @icon_url = 'http://ops.evertrue.com.s3.amazonaws.com/public/chef_logo.png'
+    @icon_url = ENV['CHEF_BOT_ICON_URL'] || 'http://ops.evertrue.com.s3.amazonaws.com/public/chef_logo.png'
     ChefAPI.configure do |config|
       # The endpoint for the Chef Server. This can be an Open Source Chef Server,
       # Hosted Chef Server, or Enterprise Chef Server.
