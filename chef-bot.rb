@@ -85,8 +85,8 @@ class Chef_Bot
   def query
     timeout = (ENV['CHEF_BOT_STALE_TIME'] || 4800).to_i
 
-    stale = Search.query(:node, "ohai_time:[* TO #{Time.now.to_i - timeout}]", start: 1)
-    @current_stale = stale.rows.map { |result| return result['name'] }
+    nodes = Search.query(:node, "ohai_time:[* TO #{Time.now.to_i - timeout}]", start: 1)
+    @current_stale = nodes.rows.map { |result| return result['name'] }
   end
 
   def update
