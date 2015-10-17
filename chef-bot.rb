@@ -111,7 +111,7 @@ class Chef_Bot
 
     # Save the current list of stale nodes for next time
 
-    puts "[#{DateTime.now}] Stale Nodes: #{@current_stale}"
+    puts "[#{Time.now.utc.iso8601}] Stale Nodes: #{@current_stale}"
 
     save(filename)
   end
