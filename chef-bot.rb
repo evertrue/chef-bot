@@ -90,7 +90,7 @@ class Chef_Bot
   end
 
   def update
-    filename = 'stale.json'
+    filename = ENV['CHEF_BOT_STALE_CACHE_FILENAME'] || 'stale.json'
 
     query()    
     load_saved(filename)
