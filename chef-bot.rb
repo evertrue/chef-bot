@@ -4,6 +4,7 @@ require 'slack-notifier'
 require 'time'
 require 'chef-api'
 require 'json'
+require 'active_support/inflector'
 
 class Chef_Bot
 
@@ -58,14 +59,6 @@ class Chef_Bot
     @notifier.username = ENV['CHEF_BOT_NAME'] || 'Chef Bot'
   end
 
-  def pluralize(n, singular, plural)
-    if n == 1
-      singular
-    else
-      plural
-    end
-  end
-
   def load_saved(filename)
     if File.exist?(filename)
       file = File.open(filename, 'r')
@@ -104,7 +97,7 @@ class Chef_Bot
     generate_attachments(freshened, 'good', 'in your network have freshened')
 
     # Tag on a totals message to display the complete state of the nodes
-    @message += "There #{pluralize(@current_stale.length, 'is', 'are')} currently #{@current_stale.length} stale #{pluralize(@current_stale.length, 'node', 'nodes')}"
+    @message += "Currently #{@current_stale.length} stale #{'node'.pluralize(@current_stale.length)}"
 
     # Send message to slack if there are any attachments (anything went stale or freshened)
     @notifier.ping @message, attachments: @attachments, icon_url: @icon_url if @attachments.any?
@@ -122,7 +115,7 @@ class Chef_Bot
         text: nodes.map { |fqdn| " - #{fqdn}" }.join("\n"),
         color: color
       }
-      @message += "#{nodes.length} #{pluralize(nodes.length, 'node', 'nodes')} #{suffix}\n"
+      @message += "#{nodes.length} #{'node'.pluralize(@current_stale.length)} #{suffix}\n"
     end
   end
 end
