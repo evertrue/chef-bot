@@ -100,8 +100,8 @@ class Chef_Bot
     generate_attachments(new_stale, 'warning', 'in your network just went stale')
 
     # Nodes that freshened
-    old_stale = (@known_stale - @current_stale)
-    generate_attachments(old_stale, 'good', 'in your network have freshened')
+    freshened = (@known_stale - @current_stale)
+    generate_attachments(freshened, 'good', 'in your network have freshened')
 
     # Tag on a totals message to display the complete state of the nodes
     @message += "There #{pluralize(current_stale.length, 'is', 'are')} currently #{current_stale.length} stale #{pluralize(current_stale.length, 'node', 'nodes')}"
