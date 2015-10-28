@@ -111,7 +111,7 @@ class Chef_Bot
 
     # Save the current list of stale nodes for next time
 
-    puts "[#{Time.now.utc.iso8601}] Stale Nodes: #{@current_stale.join(', ')}"
+    puts "[#{Time.now.utc.iso8601}] Stale Nodes: #{@current_stale.join(', ')}" if @current_stale.any?
 
     save(filename)
   end
