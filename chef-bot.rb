@@ -104,7 +104,7 @@ class Chef_Bot
     generate_attachments(freshened, 'good', 'in your network have freshened')
 
     # Tag on a totals message to display the complete state of the nodes
-    @message += "There #{pluralize(current_stale.length, 'is', 'are')} currently #{current_stale.length} stale #{pluralize(current_stale.length, 'node', 'nodes')}"
+    @message += "There #{pluralize(@current_stale.length, 'is', 'are')} currently #{@current_stale.length} stale #{pluralize(@current_stale.length, 'node', 'nodes')}"
 
     # Send message to slack if there are any attachments (anything went stale or freshened)
     @notifier.ping @message, attachments: @attachments, icon_url: @icon_url if @attachments.any?
