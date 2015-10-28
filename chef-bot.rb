@@ -109,10 +109,9 @@ class Chef_Bot
     # Send message to slack if there are any attachments (anything went stale or freshened)
     @notifier.ping @message, attachments: @attachments, icon_url: @icon_url if @attachments.any?
 
-    # Save the current list of stale nodes for next time
-
     puts "[#{Time.now.utc.iso8601}] Stale Nodes: #{@current_stale.join(', ')}" if @current_stale.any?
-
+    
+    # Save the current list of stale nodes for next time
     save(filename)
   end
 
